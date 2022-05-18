@@ -28,10 +28,11 @@ class Bool:
         return result
     
     def And(key1,key2):
+        #print("AND",key1,key2)
         index1,index2=0,0
         result=[]
         while True:
-            if(index1>=len(key1) or index1>=len(key2)):
+            if(index1>=len(key1) or index2>=len(key2)):
                 break
             if(key1[index1]==key2[index2]):
                 result.append(key1[index1])
@@ -41,6 +42,7 @@ class Bool:
                 index1=index1+1
             elif(key1[index1]>key2[index2]):
                 index2=index2+1
+       # print("AND",result)
         return result
     def Or(key1,key2):
         index1,index2=0,0
