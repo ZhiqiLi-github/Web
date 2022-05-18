@@ -94,7 +94,7 @@ def display(II,key,entry="..\\data\\Reuters"):
             print("\033[32;1m"+dispStr2+'\033[0m',end='')
             print(dispStr3)
             ## first detect if the index exists
-if(not (os.path.exists("..\\data\\II.json") and os.path.exists("..\\data\\II.bin") and os.path.exists("..\\data\\II.bit"))): 
+if(not (os.path.exists("..\\data\\II.bin") and os.path.exists("..\\data\\II.bit"))): 
     Entry="..\\data\\Reuters"
     fileNameList,indexList=os.listdir(Entry),[]
     for i in range(len(fileNameList)):

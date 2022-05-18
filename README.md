@@ -45,5 +45,7 @@ All bytes will number and bytes will convert to VB.
 
 Inverse index is stored in ``II.json II.bit`` in ``.\data``(``II.json`` is stored in the format of json and ``II.bit`` is written to file by pickle), and the compressed inversed index is stored in ``II.bin``
 
+**``II.json`` is to large which cannot be upload to github, if you want to use it, ``Index.WriteII(II,mode='json')`` can generate it。**
+
 To construct and use Index, refer to ``src\Index.py``.
 
