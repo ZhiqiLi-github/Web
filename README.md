@@ -68,26 +68,30 @@ class SearchEngine:
 
 #### TODO
 - [ ] it's too slow to read compressed inverted index, we can use numpy to accelerate.
-- [ ] data structure shoudl be modified as bellow. Frequences should be stored in term dictionary
+- [ ] data structure shoudl be modified as bellow. 
 - [ ] The class `Index` should load indices when initialized. If there is no such indices, build one. It should be implemented in `__init__`
 
 The format of the inverse index is as follow:
 
-```
-[
-	{
-	    docID1 : [pos1,pos2,....],
-	    docID2 : [pos1,pos2,....],
-    },
-	{
-	    docID1 : [pos1,pos2,....],
-	    docID2 : [pos1,pos2,....],
-    },
-]
+```python
+{
+	key1:[
+        freq,
+        {
+            docID1 : [pos1,pos2,....],
+            docID2 : [pos1,pos2,....],
+        },
+    ],
+    key2:[
+        freq,
+        {
+            docID1 : [pos1,pos2,....],
+            docID2 : [pos1,pos2,....],
+        },
+    ]
+}
 ...
 ```
-
-`inverted_index[i]` represents the inverted index of `word[i]` which `term_dict[key] = i`.
 
 For compress, the format is as follow:
 
@@ -104,19 +108,6 @@ Inverse index is stored in ``II.json II.bit`` in ``.\data``(``II.json`` is store
 **``II.json`` is to large which cannot be upload to github, if you want to use it, ``Index.WriteII(II,mode='json')`` can generate it。**
 
 To construct and use Index, refer to ``src\Index.py``.
-
-### term dictionary
-
-```python
-
-{
-    word1: [
-        wordID, 
-        freq
-    ],
-}
-
-```
 
 ### doc dictionary
 
