@@ -64,9 +64,9 @@ class SearchEngine:
 | switch      | switch current search mode to another |
 | interpreter | analysis the string that user inputs  |
 
-## Inverted Index
+### Inverted Index
 
-### TODO
+#### TODO
 - [ ] it's too slow to read compressed inverted index, we can use numpy to accelerate.
 - [ ] data structure shoudl be modified as bellow. Frequences should be stored in term dictionary
 - [ ] The class `Index` should load indices when initialized. If there is no such indices, build one. It should be implemented in `__init__`
@@ -105,3 +105,25 @@ Inverse index is stored in ``II.json II.bit`` in ``.\data``(``II.json`` is store
 
 To construct and use Index, refer to ``src\Index.py``.
 
+### term dictionary
+
+```python
+
+{
+    word1: [
+        wordID, 
+        freq
+    ],
+}
+
+```
+
+### doc dictionary
+
+```python
+
+{
+    docID: docName, 
+}
+
+```
