@@ -6,7 +6,7 @@ def inquire(key, index):
         ret = list(index[key][1][i][0] for i in range(len(index[key][1])))
     return ret
 
-def bool_op_and(stack):
+def bool_op_and(stack, *other):
     l1 = stack.pop()
     l2 = stack.pop()
     i, j = 0, 0
@@ -22,7 +22,7 @@ def bool_op_and(stack):
             j += 1
     stack.append(ret)
     
-def bool_op_or(stack):
+def bool_op_or(stack, *other):
     l1 = stack.pop()
     l2 = stack.pop()
     i, j = 0, 0
@@ -43,31 +43,20 @@ def bool_op_or(stack):
     stack.append(ret)
  
     
-def bool_op_not(stack):
-    l2 = stack.pop()
-    l1 = stack.pop()
-    ret = []
-    i, j = 0, 0
-    while i < len(l1) and j < len(l2):
-        if l1[i] == l2[j]:
-            j += 1
-            i += 1
-        elif l1[i] < l2[j]:
-            ret.append(l1[i])
-            i += 1
-        else:
-            j += 1
+def bool_op_not(stack, num_doc):
+
+    l = [0] + stack.pop() + [num_doc+1]
+    ret = sum(list(list(range(l[i]+1, l[i+1])) for i in range(len(l)-1)), start=[])
         
-    ret.extend(l1[i:])
     stack.append(ret)
     
-def bool_search(command, index):
+def bool_search(command, index, num_doc = 10788):
     OPRAND = ["NOT", "AND", "OR"]
     postfix_string = bool_parser(command)
     stack = []
     for token in postfix_string:
         if token in OPRAND:
-            eval('bool_op_'+token.lower())(stack)
+            eval('bool_op_'+token.lower())(stack, num_doc)
         else:
             stack.append(inquire(token, index))
 
@@ -82,10 +71,10 @@ def phrase_search(command, index):
 if __name__ == "__main__":
     a = list(range(0,100,2))
     b = list(range(1,100))
-    stack = [a, b]
+    stack = [a]
     print(stack)
 
     # bool_op_and(stack)
-    bool_op_not(stack)
+    bool_op_not(stack, 100)
     # bool_op_or(stack)
     print(stack)

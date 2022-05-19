@@ -38,7 +38,6 @@ def bool_parser(word_list):
     if isinstance(word_list, str):
         word_list = [word_list]
     word_list = infix2postfix(word_list)
-    print(word_list)
     return word_list
 
 def wildcard_parser(word):

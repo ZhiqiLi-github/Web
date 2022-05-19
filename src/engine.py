@@ -1,4 +1,4 @@
-from numpy import isin
+import os
 from index import Index
 from search import bool_search, wildcard_search, phrase_search
 class SearchEngine:
@@ -12,7 +12,9 @@ class SearchEngine:
         self.command = {
             "switch": self.switch
         }
-        self.inverted_index = Index.ReadII()
+
+        self.inverted_index = Index.MyReadII()
+
         self.term_dict = None
         self.doc_dict  = None
         self.search_method = [
@@ -44,7 +46,41 @@ class SearchEngine:
         if command_list[0] in self.command:
             self.command[command_list[0]](command_list[1:])
         else:
-            return self.search(command_list)
+            return self.search(command_list), command_list[0] if len(command_list) == 1 else None
 
-    def display(self, docID):
-        print(docID)
+    def display_string(self, oneStr,key):
+    # print(oneStr)
+        index=0
+        for i in range(len(oneStr)):
+            if(oneStr[i:i+len(key)]==key):
+                index=i
+                break
+    # print(index)
+        for i in range(20,100):
+            if(index-i<=0):
+                minIndex=0
+                break
+            elif(oneStr[i]==' '):
+                minIndex=index-i
+                break
+        for i in range(20,100):
+            if(index+i>=len(oneStr)):
+                maxIndex=len(oneStr)
+                break
+            elif(oneStr[i]==' '):
+                maxIndex=index+i
+                break
+        return "..."+oneStr[minIndex:index],oneStr[index:index+len(key)],oneStr[index+len(key):maxIndex]+"..."
+
+    def display(self, docIDs, key, entry="../data/Reuters"):
+        print('total:{}'.format(len(docIDs)))
+        print(" ".join(str(i) for i in docIDs[:5]) + "...")
+        for docID in docIDs[:5]:
+            file_object = open(os.path.join(entry, str(docID)+'.html'))
+            file=file_object.read()
+            dispStr1,dispStr2,dispStr3 = self.display_string(file,key)
+            print("\033[32;1m docID "+str(docID)+": \033[0m",end='')
+            print(dispStr1,end='')
+            print("\033[32;1m"+dispStr2+'\033[0m',end='')
+            print(dispStr3)
+            ## first detect if the index exists

@@ -3,9 +3,9 @@ from  engine import SearchEngine
 def main():
     engine = SearchEngine()
     while True:
-        docID = engine.interpreter(input(">>> "))
+        docID, key = engine.interpreter(input(">>> "))
         if docID is not None:
-            engine.display(docID)
+            engine.display(docID, key)
     pass
 
 
