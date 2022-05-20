@@ -28,11 +28,7 @@ def infix2postfix(sequence):
 
     while len(op_stack):
         ret.append(op_stack.pop())
-    if len(ret) > 2 and ret[1] == 'NOT':
-        tmp = ret[2]
-        ret[2] = ret[1]
-        ret[1] = ret[0]
-        ret[0] = tmp
+
     return ret
     
 def bool_parser(command_list):
