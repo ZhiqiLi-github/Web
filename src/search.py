@@ -1,4 +1,4 @@
-from parser import bool_parser
+from parser import bool_parser, wildcard_parser
 
 def inquire(key, index):
     ret = []
@@ -60,10 +60,24 @@ def bool_search(command, index, num_doc = 10788):
         else:
             stack.append(inquire(token, index))
 
-    return stack[-1]
+    return [stack[-1]], [postfix_string[-1] if len(postfix_string) == 1 else None]
 
-def wildcard_search(command, index):
-    pass
+def wildcard_search(command, two_gram_index, inverted_index):
+    word_list = wildcard_parser(command)
+    ret = [two_gram_index[word_list[0]]]
+    for word in word_list[1:]:
+        ret.append(two_gram_index[word])
+        bool_op_and(ret)
+        if len(ret[-1]) == 0:
+            break
+    
+    ans = []
+    for word in ret[-1]:
+        ids, strs = bool_search(word, inverted_index)
+        ans.append((ids[-1], strs[-1]))
+
+    ret = list(zip(*ans))
+    return ret
 
 def phrase_search(command, index):
     pass

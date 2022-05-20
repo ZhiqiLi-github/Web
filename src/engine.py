@@ -1,7 +1,8 @@
 import os
+
 from vsm import VSM
 from search import bool_search, wildcard_search, phrase_search
-from index import Index
+from index import Index, PorterStemmer
 
 class SearchEngine:
     def __init__(self) -> None:
@@ -25,15 +26,14 @@ class SearchEngine:
         # print(self.inverted_index['search'])
         self.search_method = [
             lambda command: bool_search(command, self.inverted_index),
-            lambda command: wildcard_search(command, self.two_gram_index),
+            lambda command: wildcard_search(command, self.two_gram_index, self.inverted_index),
             lambda command: phrase_search(command, self.inverted_index),
             lambda command: self.vsm.Top_k_query(command, self.top_k)
         ]
         pass
 
     def search(self, command):
-        docID = self.search_method[self.state](command)
-        return docID
+        return self.search_method[self.state](command)
         
     def switch(self, mode):
         if len(mode) > 1:
@@ -49,38 +49,49 @@ class SearchEngine:
         print("Switch search mode to "+mode)
 
     def interpreter(self, command: str):
-        command_list = command.strip().split()
-        if command_list[0] in self.command:
-            self.command[command_list[0]](command_list[1:])
+        if len(command) == 0:
+            return None, None
+        command = command.strip()
+        if command[0] == ':':
+            command = command[1:]
+            command_list = command.strip().split()
+            try: 
+                self.command[command_list[0]](command_list[1:])
+            except:
+                print("No such command ... ")
+            return None, None
         else:
-            return self.search(command_list), command_list[0] if len(command_list) == 1 else None
+            return self.search(command.split())
 
     def display_string(self, oneStr, key, pos):
         # print(oneStr)
+        stemmer = PorterStemmer()
         index = pos
-        for i in range(len(oneStr)):
-            if(oneStr[i:i+len(key)]==key):
+        for i in range(index, len(oneStr)):
+            if( stemmer.stem(oneStr[i:i+len(key)]) == key):
                 index=i
                 break
         # print(index)
         for i in range(20,100):
             if(index-i<=0):
                 minIndex=0
-                break;
+                break
             elif(oneStr[i]==' '):
                 minIndex=index-i
-                break;
+                break
         for i in range(20,100):
             if(index+i>=len(oneStr)):
                 maxIndex=len(oneStr)
-                break;
+                break
             elif(oneStr[i]==' '):
                 maxIndex=index+i
-                break;
+                break
         return "..."+oneStr[minIndex:index],oneStr[index:index+len(key)],oneStr[index+len(key):maxIndex]+"..."
 
     def display(self, docIDs, key, entry="../data/Reuters"):
-        print('total:{}'.format(len(docIDs)))
+        print("Search for", "\033[33;1m{}\033[0m".format(key), "total:", "\033[33;1m{}\033[0m".format(len(docIDs)))
+        if len(docIDs) == 0:
+            return 
         print(" ".join(str(i) for i in docIDs[:5]) + "...")
         for docID in docIDs[:5]:
             file_object = open(os.path.join(entry, self.doc_dict[docID]))

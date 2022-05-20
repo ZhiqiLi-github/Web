@@ -3,9 +3,10 @@ from  engine import SearchEngine
 def main():
     engine = SearchEngine()
     while True:
-        docID, key = engine.interpreter(input(">>> "))
-        if docID is not None:
-            engine.display(docID, key)
+        docIDs, keys = engine.interpreter(input(">>> "))
+        if keys is not None:
+            for i in range(len(docIDs)):
+                engine.display(docIDs[i], keys[i])
     pass
 
 

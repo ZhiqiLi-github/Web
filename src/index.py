@@ -276,8 +276,8 @@ class Index:
 
     def inverse_to_gram(self):
         '''
-            input: II:inverse self.__ dtype = dict
-            output: IG: 2-gram self.__ dtype = dict 
+            input: II:inverse index dtype = dict
+            output: IG: 2-gram index dtype = dict 
         '''
         IG = {}
         II = self.inverted_index
@@ -289,6 +289,9 @@ class Index:
                 if not IG.__contains__(k):
                     IG[k] = []
                 IG[k].append(r)
+
+        for i in IG:
+            IG[i].sort()
         return IG
 
 if __name__ == "__main__":

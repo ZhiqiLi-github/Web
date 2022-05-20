@@ -1,4 +1,5 @@
 from nltk.stem import PorterStemmer
+import copy
 
 stemmer = PorterStemmer()
 OPRAND = {
@@ -36,14 +37,16 @@ def infix2postfix(sequence):
     
 def bool_parser(command_list):
     if isinstance(command_list, str):
-        word_list = [command_list]
+        word_list = [copy.deepcopy(command_list)]
     else:
         word_list = [i for i in command_list ]
     after_parser = infix2postfix(word_list)
     return after_parser
 
 def wildcard_parser(word):
-    word = word.strip()
+    if len(word) != 1:
+        raise Exception("Wildcard search only supports single word")
+    word = word[0].strip()
     
     if word[0] != '*':
         word = '$'+word
@@ -54,7 +57,8 @@ def wildcard_parser(word):
     ret = []
     for word in word_list:
         ret.extend(word[i : i+2] for i in range(len(word)-1))
-    print(ret)
+
+    return ret
 
 if __name__ == "__main__":
     bool_parser("hello AND B AND ( NOT B )")
