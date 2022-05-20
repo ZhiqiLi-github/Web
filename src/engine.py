@@ -1,6 +1,26 @@
 import os
 from index import Index
+from index2 import create_index,create_dictionary,load_index,reduce_index
 from search import bool_search, wildcard_search, phrase_search
+
+NUMDOC = 10
+
+def index_2():
+    #another way to generate index
+    #pathofdictionary is the path where the dictionary is saved
+    #function create_dictionary will return a simple dictionary and a doc_map(doc_ID,doc_name)
+    #function create_index will return a full index.
+    #function reduce_index is used to reduce index and save index
+    #function load_index is used to load index file
+   
+    pathofdictionary = './data/index_file/dictionary.npy'
+    src_file = './data/Reuters/'
+    # dictionary,doc_map = create_dictionary(src_file,pathofdictionary,numdoc=NUMDOC)
+    # dictionary = create_index(src_file,dictionary,doc_map,numdoc=NUMDOC)
+
+    dictionary = load_index(pathofdictionary,'./data/index_file/index.npy')
+    return dictionary
+
 class SearchEngine:
     def __init__(self) -> None:
         self.state = 0 # 0 for bool, 1 for wildcard search, 2 for phrase search
@@ -13,7 +33,8 @@ class SearchEngine:
             "switch": self.switch
         }
 
-        self.inverted_index = Index.MyReadII()
+        # self.inverted_index = Index.MyReadII()
+        self.inverted_index = index_2()
 
         self.term_dict = None
         self.doc_dict  = None
