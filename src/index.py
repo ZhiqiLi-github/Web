@@ -257,7 +257,6 @@ class Index:
 
         II1 = self.inverted_index
         II2 = self.__read()
-        print(II1['search'])
         keyList1=[key for key in II1]
         keyList2=[key for key in II2]
         for i in range(len(keyList1)):
@@ -272,7 +271,7 @@ class Index:
                 raise Exception("\033[31m docID mismatch,"+str(keyList1[i])+":"+str(II1[key][1][j][0])+","+str(II2[key][1][j][0])+" \033[1m")
             for j in II1[key][1]:
                 if II1[key][1][j] != II2[key][1][j]:
-                    raise Exception("\033[31m doc pos mismatch,"+str(keyList1[i])+","+str(II1[key][1][j][0])+":"+str(II1[key][1][j][1][k])+","+str(II2[key][1][j][1][k])+" \033[1m")
+                    raise Exception("\033[31m doc pos mismatch \033[1m")
         print("\033[32;1m # compare II1 and II2, passed \033[0m")
 
     def inverse_to_gram(self):
