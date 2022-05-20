@@ -17,6 +17,10 @@ cd $WEBHOME/src
 python console.py
 ```
 
+For example:
+input `search`
+
+![](./image/2022-05-20_17-06.png)
 
 ## Data Structure
 

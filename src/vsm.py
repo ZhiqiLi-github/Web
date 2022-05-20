@@ -2,11 +2,8 @@
 from index import *
 import numpy as np
 
-class vsm:
-    def __init__(self) -> None:
-        pass
-    
-    def vector_from_dict(II, M):
+class VSM:
+    def __init__(self, II, M) -> None:
         '''
             input: II, dict of Index
                     M, doc number 
@@ -14,72 +11,46 @@ class vsm:
             N is the word number
             M is the doc number
         '''
-        idf = np.zeros(len(II))
-        vector = np.zeros((len(II), M))
+        self.inverted_index = II
+        n_words = len(list(II.keys()))
+        idf = []
+        # idf = np.zeros(n_words)
+        vector = np.zeros((n_words, M))
         # for index, l in enumerate(II):
         #     idf.append(len(l))
         #     for k, v in l.items():
         #         vector[index][k] = len(v)
         for index, (k, v) in enumerate(II.items()):
-            # idf.append(v[0])
-            for t in v[1]:
-                idf[index] += 1
-                vector[index][t[0]] = len(t[1])
+            idf.append(v[0])
+            keys, values = list(v[1].keys()), list(v[1].values())
+            vector[index][keys] = list(map(len, values))
+            # for key, value in v[1].items():
+            #     vector[index][key] = len(value)
+            
+        idf = np.array(idf)
         vector[vector == 0] = 0.1
         vector = np.log10(vector) + 1
         # idf = np.array(idf)
         idf = np.log10(10/idf)
-        print(vector.shape)
         idf = np.expand_dims(idf, axis=1)
-        vector = vector * idf
-        print(vector.shape)
-        vector_std = vector / (np.sqrt(np.sum(vector**2, axis=0))+1e-8)
-        return vector, vector_std
-    def Top_k_query(vector_std, q_vector, k):
+        self.vector = vector * idf
+        self.vector_std = self.vector / (np.sqrt(np.sum(self.vector**2, axis=0))+1e-8) 
+
+    def Top_k_query(self, command, k):
         '''
             input: vector: vector of doc N*M
                    q_vector: vector of the query word 1*N
                    k: the top k you need
             output idx: the list of result  
         '''
+        q_vector = self.str_to_vec(command)
         q_vector = np.expand_dims(q_vector,axis=1)
-        cosine = np.sum(vector_std * q_vector, axis=0)
+        cosine = np.sum(self.vector_std * q_vector, axis=0)
         return np.argsort(cosine)[-k:]
-    def str_to_vec(list_str, II):
-        vec = np.zeros(len(II))
-        keys = list(II.keys())
-        for s in list_str:
-            vec[keys.index(s)] = 1
-        return vec
-            
-            
 
-if __name__ == '__main__':
-    print("here test the Index compress...")
-    Entry="../data/Reuters"
-    fileNameList,indexList=os.listdir(Entry),[]
-    for i in range(len(fileNameList)):
-        tem=fileNameList[i]
-        tem=tem.strip(".html")
-        indexList.append(int(tem))
-    indexList.sort()
-    fileList=[]
-    
-    for i in range(100):#max(indexList)):
-        filePath=Entry+'/'+str(i)+'.html'
-        if(os.path.exists(filePath)):
-            file_object = open(filePath)
-            file=file_object.read()
-            fileList.append(file)
-        else:
-            print('\033[33;1m Warning: file %s not exist \033[0m' % (filePath))
-            #print('\033[31m file %s not exist \033[0m' % (filePath))
-            fileList.append('')
-    II=Index.SimpleII(fileList)
-    print(len(II))
-    v, vector_std = vsm.vector_from_dict(II, 100)
-    q = np.random.randint(0, len(II), 10)
-    q_v = np.zeros(len(II))
-    q_v[q] = 1
-    print(vsm.Top_k_query(vector_std, q_v, 10))
-    # print(v)
+    def str_to_vec(self, list_str):
+        vec = np.zeros(len(self.inverted_index))
+        keys = list(self.inverted_index.keys())
+        for s in list_str:
+            vec[keys.index(s)] += 1
+        return vec

@@ -34,11 +34,13 @@ def infix2postfix(sequence):
         ret[0] = tmp
     return ret
     
-def bool_parser(word_list):
-    if isinstance(word_list, str):
-        word_list = [word_list]
-    word_list = infix2postfix(word_list)
-    return word_list
+def bool_parser(command_list):
+    if isinstance(command_list, str):
+        word_list = [command_list]
+    else:
+        word_list = [i for i in command_list ]
+    after_parser = infix2postfix(word_list)
+    return after_parser
 
 def wildcard_parser(word):
     word = word.strip()

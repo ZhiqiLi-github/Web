@@ -1,25 +1,7 @@
 import os
-from index import Index
-from index2 import create_index,create_dictionary,load_index,reduce_index
+from vsm import VSM
 from search import bool_search, wildcard_search, phrase_search
-
-NUMDOC = 10
-
-def index_2():
-    #another way to generate index
-    #pathofdictionary is the path where the dictionary is saved
-    #function create_dictionary will return a simple dictionary and a doc_map(doc_ID,doc_name)
-    #function create_index will return a full index.
-    #function reduce_index is used to reduce index and save index
-    #function load_index is used to load index file
-   
-    pathofdictionary = './data/index_file/dictionary.npy'
-    src_file = './data/Reuters/'
-    # dictionary,doc_map = create_dictionary(src_file,pathofdictionary,numdoc=NUMDOC)
-    # dictionary = create_index(src_file,dictionary,doc_map,numdoc=NUMDOC)
-
-    dictionary = load_index(pathofdictionary,'./data/index_file/index.npy')
-    return dictionary
+from index import Index
 
 class SearchEngine:
     def __init__(self) -> None:
@@ -33,20 +15,24 @@ class SearchEngine:
             "switch": self.switch
         }
 
-        # self.inverted_index = Index.MyReadII()
-        self.inverted_index = index_2()
 
-        self.term_dict = None
-        self.doc_dict  = None
+        self.index = Index()
+        self.inverted_index = self.index.inverted_index
+        self.doc_dict, self.num_docs = self.index.get_doc()
+        self.two_gram_index = self.index.inverse_to_gram()
+        self.vsm = VSM(self.inverted_index, self.num_docs)
+        self.top_k = 5
+        # print(self.inverted_index['search'])
         self.search_method = [
-            bool_search,
-            wildcard_search,
-            phrase_search
+            lambda command: bool_search(command, self.inverted_index),
+            lambda command: wildcard_search(command, self.two_gram_index),
+            lambda command: phrase_search(command, self.inverted_index),
+            lambda command: self.vsm.Top_k_query(command, self.top_k)
         ]
         pass
 
     def search(self, command):
-        docID = self.search_method[self.state](command, self.inverted_index)
+        docID = self.search_method[self.state](command)
         return docID
         
     def switch(self, mode):
@@ -69,37 +55,38 @@ class SearchEngine:
         else:
             return self.search(command_list), command_list[0] if len(command_list) == 1 else None
 
-    def display_string(self, oneStr,key):
-    # print(oneStr)
-        index=0
+    def display_string(self, oneStr, key, pos):
+        # print(oneStr)
+        index = pos
         for i in range(len(oneStr)):
             if(oneStr[i:i+len(key)]==key):
                 index=i
                 break
-    # print(index)
+        # print(index)
         for i in range(20,100):
             if(index-i<=0):
                 minIndex=0
-                break
+                break;
             elif(oneStr[i]==' '):
                 minIndex=index-i
-                break
+                break;
         for i in range(20,100):
             if(index+i>=len(oneStr)):
                 maxIndex=len(oneStr)
-                break
+                break;
             elif(oneStr[i]==' '):
                 maxIndex=index+i
-                break
+                break;
         return "..."+oneStr[minIndex:index],oneStr[index:index+len(key)],oneStr[index+len(key):maxIndex]+"..."
 
     def display(self, docIDs, key, entry="../data/Reuters"):
         print('total:{}'.format(len(docIDs)))
         print(" ".join(str(i) for i in docIDs[:5]) + "...")
         for docID in docIDs[:5]:
-            file_object = open(os.path.join(entry, str(docID)+'.html'))
+            file_object = open(os.path.join(entry, self.doc_dict[docID]))
             file=file_object.read()
-            dispStr1,dispStr2,dispStr3 = self.display_string(file,key)
+            pos = self.inverted_index[key][1][docID][-1]
+            dispStr1,dispStr2,dispStr3 = self.display_string(file, key, pos)
             print("\033[32;1m docID "+str(docID)+": \033[0m",end='')
             print(dispStr1,end='')
             print("\033[32;1m"+dispStr2+'\033[0m',end='')

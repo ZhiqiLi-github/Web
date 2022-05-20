@@ -8,8 +8,13 @@ parser:
     
 """
 import os
+from tkinter.tix import Tree
+import numpy as np
+import pandas as pd
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
+from regex import W
+from tqdm import trange, tqdm
 import json
 import pickle
 
@@ -17,7 +22,7 @@ class Parser:
     def __init__(self):
         pass
     def parse(str):
-        list1=str.split(' ');
+        list1=str.split(' ')
         list2=[]
         for o in list1:
             oo=o.strip('\n \t,.<>/\\;\'\"()@!#$%^&*?`+-')
@@ -30,26 +35,59 @@ class Parser:
         for o in wordList:
             resultlist.append(ps.stem(o))
         return resultlist
+
 class Index:
-    def __int__(self):
+    def __init__(self, datadir='../data', index_name='II.npy'):
+        if not os.path.exists(os.path.join(datadir, 'index', index_name)):
+            path = os.path.join(datadir, 'Reuters')
+            file_list = os.listdir(path)
+            file_list.sort(key=lambda x: int(x.split('.')[0]))
+            file_objs = []
+            for file_name in file_list:    
+                file_path = os.path.join(path, file_name)
+                file_objs.append(open(file_path, encoding='ISO-8859-1').read())
+            self.inverted_index = self.create_inverted_index(file_objs)
+            doc_dict = file_list
+            num_dict = len(file_list)
+            self.__write()
+            self.__write_dict(doc_dict, num_dict)
+        else: 
+            self.inverted_index = self.__read()
+
+    def get_doc(self):
+        return self.__read_dict()
+
+    def __write_dict(self, doc_dict, num_dict, datadir = '../data/index'):
+        np.savez_compressed(os.path.join(datadir, 'doc_dict'), np.array(doc_dict, dtype=object))
         pass
-    def SimpleII(fileList):
+
+    def __read_dict(self, datadir='../data/index'):
+        doc_dict = np.load(os.path.join(datadir, 'doc_dict.npz'), allow_pickle=True)['arr_0']
+        doc_dict = list(doc_dict)
+        return doc_dict, len(doc_dict)
+
+    def get_index_by_key(self, key):
+        return self.inverted_index[key]
+
+    def create_inverted_index(self, fileList):
         II={}
-        for i in range(len(fileList)):
-            wordList1=Parser.parse(fileList[i])
+        for i in trange(len(fileList)):
+            file = fileList[i]
+            wordList1=Parser.parse(file)
             wordList2=Parser.stem(wordList1)
             temDict={}
             for j in range(len(wordList2)):
                 if(wordList2[j] not in II):
-                    II[wordList2[j]]=[0,[]]
+                    II[wordList2[j]]=[0,{}]
                 if(wordList2[j] not in temDict):
                     temDict[wordList2[j]]=[]
                 temDict[wordList2[j]].append(j)
             for key in temDict:
-                II[key][1].append([i,temDict[key]])
+                II[key][1].update({i:temDict[key]})
                 II[key][0]=II[key][0]+1
         return II
-    def convertToVB(n):
+
+    def __convertToVB(self, n):
         numList=[]
         while True:
             numList.append(n%128)
@@ -59,19 +97,19 @@ class Index:
         byteList=[]
         for i in range(len(numList)):
             if(i!=len(numList)-1):
-                byteList.append(int(numList[i]).to_bytes(length=1,signed=False,byteorder='big'))
+                byteList.append(numList[i])
             else:
-                byteList.append(int(numList[i]+128).to_bytes(length=1,signed=False,byteorder='big'))
+                byteList.append(numList[i]+128)
         return byteList
-        #print(byteList)
-#        data_byte1 = int(1324).to_bytes(length=2, byteorder='big', signed=True)
-    def convertFromVB(bytesList,index=0):
+
+    def __convertFromVB(self, bytesList,index=0):
+
         numList=[]
         while True:
-            tem=int.from_bytes(bytesList[index], byteorder='big', signed=False)
+            tem=bytesList[index]
             if tem>=128:
                 numList.append(tem-128)
-                break;
+                break
             else:
                 numList.append(tem)
             index=index+1
@@ -81,7 +119,8 @@ class Index:
             n=pos*numList[i]+n
             pos=pos*128
         return n,index+1
-    def MyWriteII(II,path="../data",fileName='II'):
+
+    def __write(self, path="../data/index",fileName='II'):
         """
         The format:
             word1length,word1pos,.....
@@ -91,121 +130,134 @@ class Index:
         totalList=[]
         keyList=[]
         numList=[]
-        for key in II:
+        II = self.inverted_index
+        last_docID = 0
+        for key in tqdm(II):
             num=II[key][0]
             wordList=[]
-            for j in range(num):
-                docID=II[key][1][j][0]
+            for j, (docID, record) in enumerate(II[key][1].items()):
                 if(j==0):
                     wordList.append(docID)
                 else:
-                    wordList.append(docID-II[key][1][j-1][0])
-                posNumber=[]
+                    wordList.append(docID-last_docID)
                 
-                for k in range(len(II[key][1][j][1])):
-                    if(k==0):
-                        posNumber.append(II[key][1][j][1][k])
-                    else:
-                        posNumber.append(II[key][1][j][1][k]-II[key][1][j][1][k-1])
-                #print(("*",docID,len(posNumber),posNumber),end=" ")
+                last_docID = docID
+
+                posNumber = np.array(record)
+                posNumber = [record[0]] + list(posNumber[1:] - posNumber[:-1])
+
                 wordList.append(len(posNumber))
                 wordList.extend(posNumber)
+                
             keyList.append(key)
             totalList.append(wordList)
             numList.append(num)
         ansList=[]
         #print(len(keyList))
         ansList.append(len(keyList))
-        for i in range(len(keyList)):
+        for i in trange(len(keyList)):
             #print(keyList[i],end=" ")
             ansList.append(len(keyList[i]))
             for j in range(len(keyList[i])):
                 ansList.append(ord(keyList[i][j]))
-        for i in range(len(totalList)):
+        for i in trange(len(totalList)):
             #print(numList[i],end=" ")
             ansList.append(numList[i])
             ansList.extend(totalList[i])
         byteList=[]
-        for i in range(len(ansList)):
-            tem=Index.convertToVB(ansList[i])
+        for i in trange(len(ansList)):
+            tem = self.__convertToVB(ansList[i])
             byteList.extend(tem)
-        ans=''
-        for i in range(len(byteList)):
-            if(i==0):
-                ans=bytes(byteList[i])
-            else:
-                ans+=bytes(byteList[i])            
-        with open(path+'/'+fileName+'.bin', "wb") as f:
-            f.write(ans)        
-        return ans
-    def MyReadII(path="../data",fileName='II',mode='bits'):
+
+        byteList = np.array(byteList, dtype=np.uint8)
+        # for i in trange(len(byteList)):
+        #     if(i==0):
+        #         ans=bytes(byteList[i])
+        #     else:
+        #         ans+=bytes(byteList[i])            
+        
+        if not os.path.exists(path):
+            os.mkdir(path)
+        
+        np.save(os.path.join(path, fileName+'.npy'), byteList)
+
+    def __read(self, path="../data/index",fileName='II'):
         ## here need to read the fileand convert it to bytes
-        buffer,II='',[]
-        with open(path+'/'+fileName+'.bin', "rb") as f:
-            buffer=f.read()           
-        for i in range(len(buffer)):
-            tem=buffer[i]
-            tem=tem.to_bytes(length=1,signed=False,byteorder='big')
-            II.append(tem)
+        print('reading index file ... ')
+        byteList = np.load(os.path.join(path,fileName+'.npy'))
+        II = list(byteList)
+
         index=0
-        num,index=Index.convertFromVB(II,index)
+        num,index = self.__convertFromVB(II,index)
         keyList=[]
         #print(num)
         for i in range(num):
-            wordLength,index=Index.convertFromVB(II,index)
+            wordLength, index = self.__convertFromVB(II,index)
             key=""
             for j in range(wordLength):
-                char,index=Index.convertFromVB(II,index)
+                char , index= self.__convertFromVB(II,index)
                 char=chr(char)
                 key=key+char
             #print(key,end=" ")
             keyList.append(key)
+
         newII={}
+        last_docID = 0
+
         for i in range(num):
-            sublistLen,index=Index.convertFromVB(II,index)
-            posWordList=[sublistLen,[]]
+            sublistLen,index=self.__convertFromVB(II,index)
+            posWordList=[sublistLen,{}]
             #print(sublistLen,end=" ")
             for j in range(sublistLen):
                 
-                docID,index=Index.convertFromVB(II,index)
-                if(j!=0):
-                    docID+=posWordList[1][j-1][0]    
-                PosNumPerDoc,index=Index.convertFromVB(II,index)
+                docID, index = self.__convertFromVB(II,index)
+                if j != 0:
+                    docID += last_docID
+                    last_docID = docID
+                else:
+                    last_docID = docID
+                PosNumPerDoc,index=self.__convertFromVB(II,index)
                 
                 posOneDoc=[]
                 for k in range(PosNumPerDoc):
-                    pos,index=Index.convertFromVB(II,index)
+                    pos,index=self.__convertFromVB(II,index)
                     if(k==0):
                         posOneDoc.append(pos)
                     else:
-                        posOneDoc.append(pos+posOneDoc[k-1])
+                        posOneDoc.append(pos+posOneDoc[-1])
                 #print(("*",docID,PosNumPerDoc,posOneDoc))
-                posWordList[1].append([docID,posOneDoc])
+                posWordList[1][docID] = posOneDoc
             newII[keyList[i]]=posWordList
-        #print(newII)
+
+        print('Done!')
         return newII 
-    def WriteII(II,path="../data",fileName='II',mode='bits'): #mode:bits and json
-        if(mode=='bits'):    
-            pick_file = open(path+'/'+fileName+'.bit','wb')
-            pickle.dump(II,pick_file)
-            pick_file.close()
-        elif(mode=='json'):
-            jsObj = json.dumps(II,sort_keys=True, indent=4)  
-            fileObject = open(path+'/'+fileName+'.json', 'w')  
-            fileObject.write(jsObj)  
-            fileObject.close() 
-    def ReadII(path="../data",fileName='II',mode='bits'): #mode:bits and json
-        if(mode=='bits'):    
-            pick_file = open(path+'/'+fileName+'.bit','rb')
-            II= pickle.load(pick_file)
-            pick_file.close()
-            return II
-        elif(mode=='json'):
-            fileObject = open(path+'/'+fileName+'.json', 'w')  
-            II=json.load(fileObject)  
-            fileObject.close()
-            return II
-    def compare(II1,II2):
+
+    # def WriteII(II,path="../data",fileName='II',mode='bits'): #mode:bits and json
+    #     if(mode=='bits'):    
+    #         pick_file = open(path+'/'+fileName+'.bit','wb')
+    #         pickle.dump(II,pick_file)
+    #         pick_file.close()
+    #     elif(mode=='json'):
+    #         jsObj = json.dumps(II,sort_keys=True, indent=4)  
+    #         fileObject = open(path+'/'+fileName+'.json', 'w')  
+    #         fileObject.write(jsObj)  
+    #         fileObject.close() 
+    # def ReadII(path="../data",fileName='II',mode='bits'): #mode:bits and json
+    #     if(mode=='bits'):    
+    #         pick_file = open(path+'/'+fileName+'.bit','rb')
+    #         II= pickle.load(pick_file)
+    #         pick_file.close()
+    #         return II
+    #     elif(mode=='json'):
+    #         fileObject = open(path+'/'+fileName+'.json', 'w')  
+    #         II=json.load(fileObject)  
+    #         fileObject.close()
+    #         return II
+    def compare(self):
+
+        II1 = self.inverted_index
+        II2 = self.__read()
+        print(II1['search'])
         keyList1=[key for key in II1]
         keyList2=[key for key in II2]
         for i in range(len(keyList1)):
@@ -214,41 +266,32 @@ class Index:
         for key in II1:
             if(II1[key][0]!=II2[key][0]):
                 raise Exception("\033[31m freq mismatch,"+str(keyList1[i])+":"+str(II1[key][0])+","+str(II2[key][0])+" \033[1m")
-            for j in range(len(II1[key][1])):
-                if(II1[key][1][j][0]!=II2[key][1][j][0]):
-                    raise Exception("\033[31m docID mismatch,"+str(keyList1[i])+":"+str(II1[key][1][j][0])+","+str(II2[key][1][j][0])+" \033[1m")
-                    if(len(II1[key][1][j][1])!=len(II2[key][1][j][1])):
-                        raise Exception("\033[31m doc pos freq mismatch,"+str(keyList1[i])+","+str(II1[key][1][j][0])+":"+str(len(II1[key][1][j][1]))+","+str(len(II2[key][1][j][1]))+" \033[1m")
-                    for k in range(II1[key][1][j][1]):
-                        if(II1[key][1][j][1][k]!=II2[key][1][j][1][k]):
-                            raise Exception("\033[31m doc pos mismatch,"+str(keyList1[i])+","+str(II1[key][1][j][0])+":"+str(II1[key][1][j][1][k])+","+str(II2[key][1][j][1][k])+" \033[1m")
+            docID1 = len(II1[key][1].keys())
+            docID2 = len(II2[key][1].keys())
+            if docID1 != docID2:
+                raise Exception("\033[31m docID mismatch,"+str(keyList1[i])+":"+str(II1[key][1][j][0])+","+str(II2[key][1][j][0])+" \033[1m")
+            for j in II1[key][1]:
+                if II1[key][1][j] != II2[key][1][j]:
+                    raise Exception("\033[31m doc pos mismatch,"+str(keyList1[i])+","+str(II1[key][1][j][0])+":"+str(II1[key][1][j][1][k])+","+str(II2[key][1][j][1][k])+" \033[1m")
         print("\033[32;1m # compare II1 and II2, passed \033[0m")
 
-if __name__ == "__main__":
-    print("here test the Index compress...")
-    Entry="../data/Reuters"
-    fileNameList,indexList=os.listdir(Entry),[]
-    for i in range(len(fileNameList)):
-        tem=fileNameList[i]
-        tem=tem.strip(".html")
-        indexList.append(int(tem))
-    indexList.sort()
-    fileList=[]
-    for i in range(100):#max(indexList)):
-        filePath=Entry+'/'+str(i)+'.html'
-        if(os.path.exists(filePath)):
-            file_object = open(filePath)
-            file=file_object.read()
-            fileList.append(file)
-        else:
-            print('\033[33;1m Warning: file %s not exist \033[0m' % (filePath))
-            #print('\033[31m file %s not exist \033[0m' % (filePath))
-            fileList.append('')
-    II=Index.SimpleII(fileList)
+    def inverse_to_gram(self):
+        '''
+            input: II:inverse self.__ dtype = dict
+            output: IG: 2-gram self.__ dtype = dict 
+        '''
+        IG = {}
+        II = self.inverted_index
+        for r in list(II.keys()):
+            s = '$' + r + '$'
+            # print(s)
+            for i in range(0, len(s) - 1):
+                k = s[i:i+2]
+                if not IG.__contains__(k):
+                    IG[k] = []
+                IG[k].append(r)
+        return IG
 
-    Index.MyWriteII(II,fileName='test_compress')
-    JJ=Index.MyReadII(fileName='test_compress')
-    Index.compare(II,JJ)
-   # Index.WriteII(II)
-    #II=Index.ReadII()
-   # Index.WriteII(II,mode='json')
+if __name__ == "__main__":
+    index = Index()
+    index.compare()

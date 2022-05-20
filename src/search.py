@@ -3,7 +3,7 @@ from parser import bool_parser
 def inquire(key, index):
     ret = []
     if key in index:
-        ret = list(index[key][1][i][0] for i in range(len(index[key][1])))
+        ret = list(index[key][1].keys())
     return ret
 
 def bool_op_and(stack, *other):
