@@ -47,15 +47,15 @@ class Index:
             self.inverted_index = self.create_inverted_index(file_objs)
             doc_dict = file_list
             num_dict = len(file_list)
-            # self.two_gram = self.__build_2_gram()
+            self.two_gram = self.__build_2_gram()
             self.__write()
             self.__write_2_gram()
             self.__write_dict(doc_dict, num_dict)
         else: 
             self.inverted_index = self.__read()
-            # self.two_gram = self.__load_2_gram()
+            self.two_gram = self.__load_2_gram()
 
-        self.two_gram = self.__build_2_gram()
+        # self.two_gram = self.__build_2_gram()
         
     def get_doc(self):
         return self.__read_dict()

@@ -14,11 +14,13 @@ class SearchEngine:
             "bool" : 0,
             "wildcard": 1,
             "phrase": 2,
+            "topk": 3,
         }
         self.command = {
             "switch": self.switch,
             "open": self.open,
             "close": self.close,
+            "top": self.change_k, 
         }
 
 
@@ -41,6 +43,11 @@ class SearchEngine:
         self.extend = False
         pass
     
+    def change_k(self, k):
+        k = int(k)
+        if k > 0:
+            self.top_k = k
+
     def open(self, command):
         old_value_correct = self.correct
         old_value_extend = self.extend
@@ -97,8 +104,11 @@ class SearchEngine:
                 command_list[i] = self.stem(command_list[i])
                 if self.correct:
                     command_list[i] = self.stem(wrong_word(self.inverted_index, command_list[i]))
+                else:
+                    if command_list[i] not in self.inverted_index:
+                        raise Exception("No such word ...")
 
-            if self.extend:
+            if self.extend and self.state != 3:
                 all_words = list(synonym(word_list[i]) for i in word_idx)
                 tmp = list(product(*all_words))
                 tmp = list(zip(*tmp))
@@ -110,8 +120,9 @@ class SearchEngine:
                 pass
             else:
                 command_list = [command_list]
-        else: 
+        elif self.state == 1: 
             command_list = [command_list]
+            
         return command_list
                     
     def switch(self, mode):
@@ -121,7 +132,7 @@ class SearchEngine:
         mode = mode[0]
         
         if mode not in self.mode:
-            print("Error: No such mode, please select from ['bool', 'wildcard', 'phrase']")
+            print("Error: No such mode, please select from ['bool', 'wildcard', 'phrase', 'topk']")
             return 
 
         self.state = self.mode[mode]
@@ -137,11 +148,17 @@ class SearchEngine:
             try: 
                 print(command_list)
                 self.command[command_list[0]](command_list[1:])
-            except:
+            except Exception as exp:
                 print("No such command ... ")
             return None
         else:
-            return self.search(command)
+            ret = None
+            try:
+                ret = self.search(command)
+            except Exception as exp:
+                
+                print(exp.args[0])
+            return ret
 
     def display_string(self, oneStr, key, pos):
         # print(oneStr)

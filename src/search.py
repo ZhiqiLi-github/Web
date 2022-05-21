@@ -89,49 +89,40 @@ def phrase_search(command, index):
     invert1 = index[command[0]][1]
     for s in command[1 :]:
         # print(s)
-        new_invert = []
+        new_invert = {}
         invert2 = index[s][1]
-        d1 = 0
-        d2 = 0
-        # print(len(invert1), len(invert2))
-        while True:
-            # print(d1, d2)
-            if d1 >= len(invert1) or d2 >= len(invert2) :
-                break
-            if invert1[d1][0] == invert2[d2][0]:
-                p1 = invert1[d1][1]
-                p2 = invert2[d2][1]
-                i1 = 0
-                i2 = 0
-                tem_pos = []
-                while True:
-                    if  i1 >= len(p1) or i2 >= len(p2):
-                        break
-                    if p1[i1] + 1 == p2[i2]:
-                        tem_pos.append(p2[i2])
-                        i1 += 1
-                        i2 += 1
-                    elif p1[i1] + 1 > p2[i2]:
-                        i2 += 1
-                    elif p1[i1] + 1 < p2[i2]:
-                        i1 += 1
-                if len(tem_pos) != 0:
-                    new_invert.append([invert1[d1][0], tem_pos])
-                if d1 < len(invert1):
-                    d1 += 1
-                if d2 < len(invert2):
-                    d2 += 1
+        key1 = set(invert1.keys())
+        key2 = set(invert2.keys())
 
-            elif invert1[d1][0] > invert2[d2][0] :
-                d2 += 1
-            elif invert1[d1][0] < invert2[d2][0] :
-                d1 += 1
+        key = key1.intersection(key2)
+
+        # print(len(invert1), len(invert2))
+        for docID in key:
+            # print(d1, d2)
+            p1 = invert1[docID]
+            p2 = invert2[docID]
+            i1 = 0
+            i2 = 0
+            tem_pos = []
+            while True:
+                if  i1 >= len(p1) or i2 >= len(p2):
+                    break
+                if p1[i1] + 1 == p2[i2]:
+                    tem_pos.append(p2[i2])
+                    i1 += 1
+                    i2 += 1
+                elif p1[i1] + 1 > p2[i2]:
+                    i2 += 1
+                elif p1[i1] + 1 < p2[i2]:
+                    i1 += 1
+            if len(tem_pos) != 0:
+                new_invert[docID] = tem_pos
+
         invert1 = new_invert
 
-    doc_ret = []
-    for i in range(len(invert1)):
-        doc_ret.append(invert1[i][0])
-    return doc_ret, ori, False
+    doc_ret = list(invert1.keys())
+    doc_ret.sort()
+    return doc_ret, " ".join(ori), False
 
 if __name__ == "__main__":
     # a = list(range(0,100,2))
