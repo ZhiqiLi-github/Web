@@ -13,10 +13,8 @@ import numpy as np
 import pandas as pd
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
-from regex import W
 from tqdm import trange, tqdm
-import json
-import pickle
+from multiprocessing.dummy import Pool
 
 class Parser:
     def __init__(self):
@@ -49,13 +47,59 @@ class Index:
             self.inverted_index = self.create_inverted_index(file_objs)
             doc_dict = file_list
             num_dict = len(file_list)
+            # self.two_gram = self.__build_2_gram()
             self.__write()
+            self.__write_2_gram()
             self.__write_dict(doc_dict, num_dict)
         else: 
             self.inverted_index = self.__read()
+            # self.two_gram = self.__load_2_gram()
 
+        self.two_gram = self.__build_2_gram()
+        
     def get_doc(self):
         return self.__read_dict()
+
+    def __write_2_gram(self, path='../data/index/two_gram.txt'):
+        all = []
+        for key, value in self.two_gram.items():
+            all.append(key+","+",".join(value))
+
+        with open(path, "w") as f:
+            f.write("|".join(all))
+
+        f.close()
+    def __load_2_gram(self, path='../data/index/two_gram.txt'):
+        pool = Pool(8)
+        with open(path) as f:
+            all = f.read()
+
+        all = all.split('|')
+        all = list(pool.map(lambda x: x.split(','), all))
+        all = dict(pool.map(lambda x: (x[0], x[1:]), all))
+
+        f.close()
+        return all
+
+    def __build_2_gram(self):
+        '''
+            input: II:inverse index dtype = dict
+            output: IG: 2-gram index dtype = dict 
+        '''
+        IG = {}
+        II = self.inverted_index
+        for r in list(II.keys()):
+            s = '$' + r + '$'
+            # print(s)
+            for i in range(0, len(s) - 1):
+                k = s[i:i+2]
+                if not IG.__contains__(k):
+                    IG[k] = []
+                IG[k].append(r)
+
+        for i in IG:
+            IG[i].sort()
+        return IG
 
     def __write_dict(self, doc_dict, num_dict, datadir = '../data/index'):
         np.savez_compressed(os.path.join(datadir, 'doc_dict'), np.array(doc_dict, dtype=object))
@@ -274,25 +318,7 @@ class Index:
                     raise Exception("\033[31m doc pos mismatch \033[1m")
         print("\033[32;1m # compare II1 and II2, passed \033[0m")
 
-    def inverse_to_gram(self):
-        '''
-            input: II:inverse index dtype = dict
-            output: IG: 2-gram index dtype = dict 
-        '''
-        IG = {}
-        II = self.inverted_index
-        for r in list(II.keys()):
-            s = '$' + r + '$'
-            # print(s)
-            for i in range(0, len(s) - 1):
-                k = s[i:i+2]
-                if not IG.__contains__(k):
-                    IG[k] = []
-                IG[k].append(r)
-
-        for i in IG:
-            IG[i].sort()
-        return IG
+    
 
 if __name__ == "__main__":
     index = Index()

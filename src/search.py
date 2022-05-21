@@ -1,7 +1,5 @@
 from parser import bool_parser, wildcard_parser
 # from parser import bool_parser
-from ast import Pass
-from tkinter.tix import Tree
 from index import *
 def inquire(key, index):
     ret = []
@@ -62,8 +60,7 @@ def bool_search(command, index, num_doc = 10788):
             eval('bool_op_'+token.lower())(stack, num_doc)
         else:
             stack.append(inquire(token, index))
-
-    return [stack[-1]], [postfix_string[-1] if len(postfix_string) == 1 else None]
+    return stack[-1], postfix_string[-1] if len(postfix_string) == 1 else " ".join(command), len(postfix_string) == 1
 
 def wildcard_search(command, two_gram_index, inverted_index):
     word_list = wildcard_parser(command)
@@ -73,13 +70,13 @@ def wildcard_search(command, two_gram_index, inverted_index):
         bool_op_and(ret)
         if len(ret[-1]) == 0:
             break
-    
     ans = []
     for word in ret[-1]:
-        ids, strs = bool_search(word, inverted_index)
-        ans.append((ids[-1], strs[-1]))
+        ids, strs, disp = bool_search(word, inverted_index)
+        ans.append((ids, strs, disp))
 
-    ret = list(zip(*ans))
+    # ret = list(zip(*ans))
+    ret = ans
     return ret
 
 def phrase_search(command, index):
@@ -89,8 +86,6 @@ def phrase_search(command, index):
         output: the index of the doc
     '''
     ori = command
-    command = Parser.parse(ori)
-    command = Parser.stem(command)
     invert1 = index[command[0]][1]
     for s in command[1 :]:
         # print(s)
@@ -136,7 +131,7 @@ def phrase_search(command, index):
     doc_ret = []
     for i in range(len(invert1)):
         doc_ret.append(invert1[i][0])
-    return [doc_ret], [ori]
+    return doc_ret, ori, False
 
 if __name__ == "__main__":
     # a = list(range(0,100,2))

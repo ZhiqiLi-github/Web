@@ -1,4 +1,5 @@
 from nltk.stem import PorterStemmer
+from nltk.corpus import wordnet as wn
 import copy
 
 stemmer = PorterStemmer()
@@ -33,7 +34,7 @@ def infix2postfix(sequence):
     
 def bool_parser(command_list):
     if isinstance(command_list, str):
-        word_list = [copy.deepcopy(command_list)]
+        word_list = [command_list]
     else:
         word_list = [i for i in command_list ]
     after_parser = infix2postfix(word_list)
@@ -56,6 +57,17 @@ def wildcard_parser(word):
 
     return ret
 
+def synonym(word: str):
+    synsets = wn.synsets(word)
+    ret = [word]
+    for syn in synsets:
+        ret.append(syn.lemmas()[0].name())
+    ret = list(set(ret))[:3]
+
+    return ret
+
+
 if __name__ == "__main__":
-    bool_parser("hello AND B AND ( NOT B )")
-    wildcard_parser("app*le*s")
+    # bool_parser("hello AND B AND ( NOT B )")
+    # wildcard_parser(["app*le*s"])
+    print(synonym('apple'))

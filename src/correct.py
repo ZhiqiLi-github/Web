@@ -11,7 +11,6 @@ def wrong_word(Dictionary,input_word):
 				listofword.append(word)
 		min_dis,min_idx = 10000,0
 		idx = 0
-		print(listofword)
 		for word in listofword:
 			dist = count_dist(word,input_word)
 			if dist < min_dis:
@@ -19,7 +18,9 @@ def wrong_word(Dictionary,input_word):
 				min_idx = idx
 			idx += 1
 
+
 		outputword = listofword[min_idx]
+		print("\033[31;1m{}\033[0m".format(input_word+' ---> ' + outputword))
 
 	return outputword
 
