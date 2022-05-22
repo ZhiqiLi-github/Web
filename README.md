@@ -11,7 +11,7 @@
 
 ## Usage
 
-```
+```sh
 git clone ...
 cd $WEBHOME/src 
 python console.py
@@ -21,6 +21,46 @@ For example:
 input `search`
 
 ![](./image/2022-05-20_17-06.png)
+
+### Bool Search
+
+```sh
+:switch bool
+WORD
+```
+
+### Wildcard Search
+
+```sh
+:switch wildcard
+*search
+```
+
+### Phrase Search
+```
+:switch phrase
+to do
+```
+
+### Open Correct
+
+```sh
+:open correct
+saerch 
+```
+
+### Open Synonym Extend
+
+```
+:open extend
+search
+```
+
+### Top K
+```
+:switch topk
+search research
+```
 
 ## Data Structure
 
