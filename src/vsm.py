@@ -15,6 +15,7 @@ class VSM:
         if os.path.exists('../data/index/vector.npy') and os.path.exists('../data/index/vector_std.npy'):
             self.vector = np.load('../data/index/vector.npy')
             self.vector_std = np.load('../data/index/vector_std.npy')
+            self.idf = np.load('../data/index/idf.npy')
         else:
             n_words = len(list(II.keys()))
             idf = []
@@ -35,10 +36,11 @@ class VSM:
             vector[vector == 0] = 0.1
             vector = np.log10(vector) + 1
             # idf = np.array(idf)S
-            idf = np.log10(n_words/idf)
+            self.idf = np.log10(n_words/idf)
             idf = np.expand_dims(idf, axis=1)
             self.vector = vector * idf
             self.vector_std = self.vector / (np.sqrt(np.sum(self.vector**2, axis=0))+1e-8) 
+            np.save('../data/index/idf.npy', self.idf)
             np.save('../data/index/vector.npy', self.vector)
             np.save('../data/index/vector_std.npy', self.vector_std)
 
@@ -49,7 +51,7 @@ class VSM:
                    k: the top k you need
             output idx: the list of result  
         '''
-        q_vector = self.str_to_vec(command)
+        q_vector = self.str_to_vec(command) * self.idf
         q_vector = np.expand_dims(q_vector,axis=1)
         cosine = np.sum(self.vector_std * q_vector, axis=0)
         ret = list(np.argpartition(cosine, k)[:k])
