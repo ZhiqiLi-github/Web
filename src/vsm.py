@@ -36,7 +36,7 @@ class VSM:
             vector[vector == 0] = 0.1
             vector = np.log10(vector) + 1
             # idf = np.array(idf)S
-            self.idf = np.log10(n_words/idf)
+            self.idf = np.log10(M/idf)
             idf = np.expand_dims(idf, axis=1)
             self.vector = vector * idf
             self.vector_std = self.vector / (np.sqrt(np.sum(self.vector**2, axis=0))+1e-8) 
@@ -53,10 +53,14 @@ class VSM:
         '''
         q_vector = self.str_to_vec(command) * self.idf
         q_vector = np.expand_dims(q_vector,axis=1)
-        cosine = np.sum(self.vector_std * q_vector, axis=0)
-        ret = list(np.argpartition(cosine, k)[:k])
-        ret.sort()
-        return ret, " ".join(command), False
+        cosine = np.sum(self.vector_std * q_vector, axis=0) / np.linalg.norm(q_vector)
+        ret = np.argpartition(-cosine, k)[:k]
+        ret_cosine = cosine[ret]
+        ret_idx = np.argsort(-ret_cosine)
+        ret_cosine = ret_cosine[ret_idx]
+        ret = ret[ret_idx]
+        
+        return ret, " ".join(command), cosine[ret]
 
     def str_to_vec(self, list_str):
         vec = np.zeros(len(self.inverted_index))
