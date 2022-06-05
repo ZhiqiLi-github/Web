@@ -18,8 +18,10 @@ from multiprocessing.dummy import Pool
 class Parser:
     def __init__(self):
         pass
-    def parse(str):
-        list1=str.split(' ')
+    def parse(stream: str):
+        stream = stream.replace('&', ' ')\
+                       .replace(';', ' ')
+        list1=stream.split(' ')
         list2=[]
         for o in list1:
             oo=o.strip('\n \t,.<>/\\;\'\"()@!#$%^&*?`+-')
