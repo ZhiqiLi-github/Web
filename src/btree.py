@@ -378,8 +378,8 @@ def main():
 	print()
 
 	begin_time = time()
-	for i in range(100):
-		idx = randint(0,customNo)
+	for i in range(10000):
+		idx = randint(0,customNo-1)
 		key = list(inverted_index.keys())[idx]
 		# print(inverted_index[key])
 		index = inverted_index[key]
@@ -389,8 +389,8 @@ def main():
 	print('python字典搜索运行时间：', run_time)
 	
 	begin_time = time()
-	for i in range(100):
-		idx = randint(0,customNo)
+	for i in range(10000):
+		idx = randint(0,customNo-1)
 		key = list(inverted_index.keys())[idx]
 		index = B.retrieve(key)
 
