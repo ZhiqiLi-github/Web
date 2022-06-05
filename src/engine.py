@@ -162,29 +162,6 @@ class SearchEngine:
                 print(exp.args[0])
             return ret
 
-    def display_string(self, oneStr, key, pos):
-        # print(oneStr)
-        index = pos
-        for i in range(index, len(oneStr)):
-            if( oneStr[i:i+len(key)].lower() == key ):
-                index=i
-                break
-        # print(index)
-        for i in range(20,100):
-            if(index-i<=0):
-                minIndex=0
-                break
-            elif(oneStr[i]==' '):
-                minIndex=index-i
-                break
-        for i in range(20,100):
-            if(index+i>=len(oneStr)):
-                maxIndex=len(oneStr)
-                break
-            elif(oneStr[i]==' '):
-                maxIndex=index+i
-                break
-        return "..."+oneStr[minIndex:index],oneStr[index:index+len(key)],oneStr[index+len(key):maxIndex]+"..."
 
     def display_topk_table(self, docIds, scores):
         
@@ -226,7 +203,6 @@ class SearchEngine:
 
         else:
             print("Doc names: "+" ".join(self.doc_dict[idx]+'\n' if (cnt+1) % 5 == 0 else self.doc_dict[idx] for cnt, idx in enumerate(docIDs)) )
-
         if disp:
             if choice == 'y':
                 docIDs_to_show = docIDs
@@ -235,10 +211,60 @@ class SearchEngine:
             for docID in docIDs_to_show:
                 file_object = open(os.path.join(entry, self.doc_dict[docID]))
                 file=file_object.read()
-                pos = self.inverted_index[key][1][docID][-1]
-                dispStr1,dispStr2,dispStr3 = self.display_string(file, key, pos)
+                # pos = self.inverted_index[key][1][docID][-1]
+                print(self.doc_dict[docID])
+                dispStr1,dispStr2,dispStr3 = self.display_string(file, key)
                 print("\033[32;1m {}".format(self.doc_dict[docID])+": \033[0m",end='')
                 print(dispStr1,end='')
                 print("\033[32;1m"+dispStr2+'\033[0m',end='')
                 print(dispStr3)
                 ## first detect if the index exists
+    def display_string(self, oneStr, key):
+        list1 = oneStr.split(' ')
+        m = {}
+        list2 = []
+        k = 0
+        for i in range(len(list1)):
+            oo = list1[i].strip('\n \t,.<>/\\;\'\"()@!#$%^&*?`+-')
+            if len(oo) > 0:
+                list2.append(oo)
+                m[k] = i
+                k +=1
+        list2 = list(map(self.stem, list2))
+        listkey = key.split(' ')
+        idx = -1
+        for i in range(len(list2)-len(listkey)+1):
+            flag = True
+            for j in range(len(listkey)):
+                if list2[i + j] != listkey[j]:
+                    flag = False
+                    break
+            if flag:
+                idx = i
+                break
+        if idx != -1:
+            length = 0
+            r = ''
+            b = m[idx]
+            e = m[idx + len(listkey)-1]
+            for i in range(b, e+1):
+                r += list1[i] + ' '
+                length += len(list1[i])+1
+            begin = oneStr.find(r)
+            minIndex = 0
+            for i in range(20, 100):
+                if begin - i <= 0:
+                    minIndex = 0
+                    break
+                elif oneStr[begin - i] == ' ':
+                    minIndex = begin - i
+                    break
+            maxIndex = 0
+            for i in range(20, 100):
+                if begin + i + length >= len(oneStr):
+                    maxIndex = begin + i + length
+                    break
+                elif oneStr[begin+i+length] == ' ':
+                    maxIndex = begin+length + i
+                    break
+            return "..."+oneStr[minIndex:begin],oneStr[begin:begin+length],oneStr[begin+length:maxIndex]+"..."
