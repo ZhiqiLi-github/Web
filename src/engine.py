@@ -1,5 +1,6 @@
 from itertools import product
 import os
+from pydoc import doc
 
 from vsm import VSM
 from search import bool_search, wildcard_search, phrase_search
@@ -44,7 +45,7 @@ class SearchEngine:
         pass
     
     def change_k(self, k):
-        k = int(k)
+        k = int(k[0])
         if k > 0:
             self.top_k = k
 
@@ -184,18 +185,53 @@ class SearchEngine:
                 break
         return "..."+oneStr[minIndex:index],oneStr[index:index+len(key)],oneStr[index+len(key):maxIndex]+"..."
 
+    def display_topk_table(self, docIds, scores):
+        
+        print("-"*20+"top %3d"%(self.top_k)+'-'*2+'-'*20)
+        print("|"+"-"*48+"|")
+        print("|"+"Doc name".center(24, ' ')+"|"+"score".center(23, ' ')+"|")
+        print("|"+"-"*48+"|")
+        for i in range(self.top_k):
+            name = self.doc_dict[docIds[i]]
+            score_str = "%.4f"%(scores[i])
+            print("|"+ name.center(24, ' ')+"|" +score_str.center(23, ' ')+"|")
+            print("|"+"-"*48+"|")
+        return        
     def display(self, result):
         if result is not None:
-            for docIDs, key, disp in result:
-                self.display_res(docIDs, key, disp)
+            if self.state != 3:
+                for docIDs, key, disp in result:
+                    self.display_res(docIDs, key, disp)
+            else:
+                docIDs, _ , scores = result[0]
+                self.display_topk_table(docIDs, scores)
 
     def display_res(self, docIDs, key, disp, entry="../data/Reuters"):
         print("Search for", "\033[33;1m{}\033[0m".format(key), "total:", "\033[33;1m{}\033[0m".format(len(docIDs)))
         if len(docIDs) == 0:
             return 
-        print("docIDs: "+" ".join(str(i) for i in docIDs[:5]) + "...")
+
+        choice = 'n'
+        if len(docIDs) > 20:
+            while 1:
+                choice = input("The answers may be too long to show all of them,\n do u wanna show them all?[y/n]")
+                if choice not in ['y', 'n']:
+                    choice = input("Please choose from [y, n]")
+                else:
+                    break
+                
+        if choice == 'n':
+            print("Doc names: "+" ".join(self.doc_dict[idx] for idx in docIDs[:5]) + ' ...')
+
+        else:
+            print("Doc names: "+" ".join(self.doc_dict[idx]+'\n' if (cnt+1) % 5 == 0 else self.doc_dict[idx] for cnt, idx in enumerate(docIDs)) )
+
         if disp:
-            for docID in docIDs[:5]:
+            if choice == 'y':
+                docIDs_to_show = docIDs
+            else:
+                docIDs_to_show = docIDs[:5]
+            for docID in docIDs_to_show:
                 file_object = open(os.path.join(entry, self.doc_dict[docID]))
                 file=file_object.read()
                 pos = self.inverted_index[key][1][docID][-1]
