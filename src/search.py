@@ -64,15 +64,17 @@ def bool_search(command, index, num_doc = 10788):
 
 def wildcard_search(command, two_gram_index, inverted_index):
     word_list = wildcard_parser(command)
-    ret = [two_gram_index[word_list[0]]]
+    set1 = set(two_gram_index[word_list[0]])
     for word in word_list[1:]:
-        ret.append(two_gram_index[word])
-        bool_op_and(ret)
-        if len(ret[-1]) == 0:
+        set2 = set(two_gram_index[word])
+        set1 = set1.intersection(set2)
+        if len(set1) == 0:
             break
     ans = []
-    for word in ret[-1]:
-        ids, strs, disp = bool_search(word, inverted_index)
+    ret = list(set1)
+    print(ret)
+    for word in ret:
+        ids, strs, disp = bool_search([word], inverted_index)
         ans.append((ids, strs, disp))
 
     # ret = list(zip(*ans))

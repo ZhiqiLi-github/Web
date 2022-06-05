@@ -236,7 +236,7 @@ class SearchEngine:
                 file=file_object.read()
                 pos = self.inverted_index[key][1][docID][-1]
                 dispStr1,dispStr2,dispStr3 = self.display_string(file, key, pos)
-                print("\033[32;1m docID "+str(docID)+": \033[0m",end='')
+                print("\033[32;1m {}".format(self.doc_dict[docID])+": \033[0m",end='')
                 print(dispStr1,end='')
                 print("\033[32;1m"+dispStr2+'\033[0m',end='')
                 print(dispStr3)
