@@ -6,7 +6,8 @@ from vsm import VSM
 from search import bool_search, wildcard_search, phrase_search
 from parser import synonym
 from correct import wrong_word
-from index import Index, PorterStemmer
+from index import Index
+from stem import Stemmer
 
 class SearchEngine:
     def __init__(self) -> None:
@@ -38,7 +39,7 @@ class SearchEngine:
             lambda command: phrase_search(command, self.inverted_index),
             lambda command: self.vsm.Top_k_query(command, self.top_k)
         ]
-        self.stemmer = PorterStemmer()
+        self.stemmer = Stemmer()
 
         self.correct = False
         self.extend = False

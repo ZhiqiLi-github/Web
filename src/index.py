@@ -11,8 +11,7 @@ import os
 from tkinter.tix import Tree
 import numpy as np
 import pandas as pd
-from nltk.stem import PorterStemmer
-from nltk.tokenize import word_tokenize
+from stem import Stemmer
 from tqdm import trange, tqdm
 from multiprocessing.dummy import Pool
 
@@ -29,7 +28,7 @@ class Parser:
         return list2
     def stem(wordList):
         resultlist=[]
-        ps = PorterStemmer()
+        ps = Stemmer()
         for o in wordList:
             resultlist.append(ps.stem(o))
         return resultlist

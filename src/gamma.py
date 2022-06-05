@@ -1,9 +1,3 @@
-from operator import mod
-
-from numpy import zeros
-
-
-
 def gamma_encode_number(a):
 	temp = bin(a)
 	res = temp.replace('0b','')

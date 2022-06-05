@@ -1,6 +1,6 @@
 import os
-from nltk.stem import *
 import numpy as np
+from stem import Stemmer
 from gamma import *
 import copy
 
@@ -30,7 +30,7 @@ def create_dictionary(src,dic_path,numdoc=NUMDOC):
 			oo=o.strip('\n \t,.<>/\\;\'\"()@!#$%^&*?`+-:')
 			if(len(oo)>0) and oo[0] not in ['0','1','2','3','4','5','6','7','8','9']:
 				doc_afterremove.append(oo)
-		stemmer = SnowballStemmer("english")
+		stemmer = Stemmer()
 		for word in doc_afterremove:
 			word_1 = stemmer.stem(word)
 			doc_final.append(word_1)
@@ -56,7 +56,7 @@ def create_index(src,Dictionary,docmap,numdoc=NUMDOC):
 	for i in range(numdoc):
 		doc_index.append(int(filenames[i].split('.')[0]))
 	
-	stemmer = SnowballStemmer("english")
+	stemmer = Stemmer()
 	for i in range(numdoc):
 		pos = 0
 		f = open(src+filenames[i])
