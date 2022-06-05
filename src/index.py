@@ -11,16 +11,17 @@ import os
 from tkinter.tix import Tree
 import numpy as np
 import pandas as pd
-from nltk.stem import PorterStemmer
-from nltk.tokenize import word_tokenize
+from stem import Stemmer
 from tqdm import trange, tqdm
 from multiprocessing.dummy import Pool
 
 class Parser:
     def __init__(self):
         pass
-    def parse(str):
-        list1=str.split(' ')
+    def parse(stream: str):
+        stream = stream.replace('&', ' ')\
+                       .replace(';', ' ')
+        list1=stream.split(' ')
         list2=[]
         for o in list1:
             oo=o.strip('\n \t,.<>/\\;\'\"()@!#$%^&*?`+-')
@@ -29,7 +30,7 @@ class Parser:
         return list2
     def stem(wordList):
         resultlist=[]
-        ps = PorterStemmer()
+        ps = Stemmer()
         for o in wordList:
             resultlist.append(ps.stem(o))
         return resultlist
