@@ -162,7 +162,6 @@ class SearchEngine:
             return ret
 
 
-
     def display_topk_table(self, docIds, scores):
         
         print("-"*20+"top %3d"%(self.top_k)+'-'*2+'-'*20)

@@ -1,8 +1,6 @@
-from nltk.stem import PorterStemmer
 from nltk.corpus import wordnet as wn
 import copy
 
-stemmer = PorterStemmer()
 OPRAND = {
     "NOT": 2, 
     "AND": 1,
@@ -25,7 +23,7 @@ def infix2postfix(sequence):
                 ret.append(op_stack.pop())
             op_stack.append(token)
         else:
-            ret.append(stemmer.stem(token))
+            ret.append(token)
 
     while len(op_stack):
         ret.append(op_stack.pop())
