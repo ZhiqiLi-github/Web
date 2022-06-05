@@ -165,7 +165,7 @@ class SearchEngine:
         # print(oneStr)
         index = pos
         for i in range(index, len(oneStr)):
-            if( self.stem(oneStr[i:i+len(key)]) == key ):
+            if( oneStr[i:i+len(key)].lower() == key ):
                 index=i
                 break
         # print(index)
