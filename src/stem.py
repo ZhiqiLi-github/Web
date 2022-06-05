@@ -164,7 +164,7 @@ class Stemmer():
         ):
             return self._step2(self._replace_suffix(word, "alli", "al"))
         rules = [
-            ("ational", "ate", self._has_positive_measure),
+            ("ational", "ation", self._has_positive_measure),
             ("tional", "tion", self._has_positive_measure),
             ("enci", "ence", self._has_positive_measure),
             ("anci", "ance", self._has_positive_measure),
@@ -174,8 +174,8 @@ class Stemmer():
             ("entli", "ent", self._has_positive_measure),
             ("eli", "e", self._has_positive_measure),
             ("ousli", "ous", self._has_positive_measure),
-            ("ization", "ize", self._has_positive_measure),
-            ("ation", "ate", self._has_positive_measure),
+            # ("ization", "ize", self._has_positive_measure),
+            # ("ation", "ate", self._has_positive_measure),
             ("ator", "ate", self._has_positive_measure),
             ("alism", "al", self._has_positive_measure),
             ("iveness", "ive", self._has_positive_measure),
@@ -220,14 +220,14 @@ class Stemmer():
                 ("ment", "", measure_gt_1),
                 ("ent", "", measure_gt_1),
                 # (m>1 and (*S or *T)) ION ->
-                (
-                    "ion",
-                    "",
-                    lambda stem: self._measure(stem) > 1 and stem[-1] in ("s", "t"),
-                ),
+                # (
+                #     "ion",
+                #     "",
+                #     lambda stem: self._measure(stem) > 1 and stem[-1] in ("s", "t"),
+                # ),
                 ("ou", "", measure_gt_1),
                 ("ism", "", measure_gt_1),
-                ("ate", "", measure_gt_1),
+                # ("ate", "", measure_gt_1),
                 ("iti", "", measure_gt_1),
                 ("ous", "", measure_gt_1),
                 ("ive", "", measure_gt_1),
@@ -252,11 +252,11 @@ class Stemmer():
             return self.pool[stem]
         stem = self._step1a(stem)
         stem = self._step1b(stem)
-        stem = self._step1c(stem)
+        # stem = self._step1c(stem)
         stem = self._step2(stem)
         stem = self._step3(stem)
         stem = self._step4(stem)
-        stem = self._step5a(stem)
+        # stem = self._step5a(stem)
         stem = self._step5b(stem)
         return stem
 if __name__ == "__main__":
