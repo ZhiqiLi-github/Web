@@ -25,6 +25,7 @@ class SearchEngine:
             "top": self.change_k, 
             "info": self.info,
             "cls": self.clear,
+            "exit": self.exit,
         }
         self.command_info = {
             "switch": "switch search mode. Please choose from bool, wildcard, phrase and topk",
@@ -33,6 +34,7 @@ class SearchEngine:
             "top": "Change the top k, which should be an integer",
             "info": "show the info",
             "cls": "clear the screen",
+            "exit": "as name shows"
         }
 
 
@@ -56,6 +58,8 @@ class SearchEngine:
         self.extend = False
         pass
     
+    def exit(self, *args):
+        exit()
     def info(self, *args):
         print("Current Mode   : \033[33;1m{}\033[0m".format(list(self.mode.keys())[self.state]))
         print("Extend         : \033[33;1m{}\033[0m".format(self.extend))
@@ -233,11 +237,11 @@ class SearchEngine:
         else:
             choice = 'n'
                 
-        if choice == 'n':
-            print("Doc names: "+" ".join(self.doc_dict[idx] for idx in docIDs[:5]) + ' ...')
+        # if choice == 'n':
+        #     print("Doc names: "+" ".join(self.doc_dict[idx] for idx in docIDs[:5]) + ' ...')
 
-        else:
-            print("Doc names: "+" ".join(self.doc_dict[idx]+'\n' if (cnt+1) % 5 == 0 else self.doc_dict[idx] for cnt, idx in enumerate(docIDs)) )
+        # else:
+        print("Doc names: "+" ".join(self.doc_dict[idx]+'\n' if (cnt+1) % 5 == 0 else self.doc_dict[idx] for cnt, idx in enumerate(docIDs)) )
         if disp:
             if choice == 'y':
                 docIDs_to_show = docIDs
