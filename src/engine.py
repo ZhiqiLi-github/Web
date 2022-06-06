@@ -23,6 +23,16 @@ class SearchEngine:
             "open": self.open,
             "close": self.close,
             "top": self.change_k, 
+            "info": self.info,
+            "cls": self.clear,
+        }
+        self.command_info = {
+            "switch": "switch search mode. Please choose from bool, wildcard, phrase and topk",
+            "open": "open the features, such auto correct and extention. Please choose from \"correct\" and \"extend\"",
+            "close": "close the features. Like open",
+            "top": "Change the top k, which should be an integer",
+            "info": "show the info",
+            "cls": "clear the screen",
         }
 
 
@@ -39,16 +49,36 @@ class SearchEngine:
             lambda command: phrase_search(command, self.inverted_index),
             lambda command: self.vsm.Top_k_query(command, self.top_k)
         ]
+
         self.stemmer = Stemmer()
 
         self.correct = False
         self.extend = False
         pass
     
+    def info(self, *args):
+        print("Current Mode   : \033[33;1m{}\033[0m".format(list(self.mode.keys())[self.state]))
+        print("Extend         : \033[33;1m{}\033[0m".format(self.extend))
+        print("Correct        : \033[33;1m{}\033[0m".format(self.correct))
+        print("Top K          : \033[33;1m{}\033[0m".format(self.top_k))
+        print("Support Command: ")
+        for i in self.command.keys():
+            print("       \033[33;1m{}\033[0m".format(i) + "  info: {}".format(self.command_info[i]))
+
+        print("Support Search Method: ")
+        for i in self.mode.keys():
+            print("       \033[33;1m{}\033[0m".format(i))
+
     def change_k(self, k):
         k = int(k[0])
         if k > 0:
             self.top_k = k
+    
+    def clear(self, *args):
+        if os.name == 'nt':
+            os.system('cls')
+        elif os.name == 'posix':
+            os.system('clear')
 
     def open(self, command):
         old_value_correct = self.correct
@@ -88,8 +118,13 @@ class SearchEngine:
     
     def search(self, command):
         command_list = self.preprocess(command)
-        res = list(self.search_method[self.state](com) for com in command_list)
+        if self.extend:
+            print("Extended command: \n")
+            for command in command_list:
+                print("\033[33;1m{}\033[0m".format(" ".join(command)))
+            print()
 
+        res = list(self.search_method[self.state](com) for com in command_list)
         if self.state == 1:
             res = res[-1]
         return res
@@ -105,7 +140,7 @@ class SearchEngine:
             for i in word_idx:
                 command_list[i] = self.stem(command_list[i])
                 if self.correct:
-                    command_list[i] = self.stem(wrong_word(self.inverted_index, command_list[i]))
+                    command_list[i] = wrong_word(self.inverted_index, command_list[i])
                 else:
                     if command_list[i] not in self.inverted_index:
                         raise Exception("No such word ...")
@@ -148,7 +183,6 @@ class SearchEngine:
             command = command[1:]
             command_list = command.strip().split()
             try: 
-                print(command_list)
                 self.command[command_list[0]](command_list[1:])
             except Exception as exp:
                 print("No such command ... ")
@@ -189,14 +223,15 @@ class SearchEngine:
         if len(docIDs) == 0:
             return 
 
-        choice = 'n'
+        choice = None
         if len(docIDs) > 20:
-            while 1:
-                choice = input("The answers may be too long to show all of them,\n do u wanna show them all?[y/n]")
+            while choice not in ['y', 'n']:
+                if choice is None:
+                    choice = input("The answers may be too long to show all of them,\n do u wanna show them all?[y/n]")
                 if choice not in ['y', 'n']:
                     choice = input("Please choose from [y, n]")
-                else:
-                    break
+        else:
+            choice = 'n'
                 
         if choice == 'n':
             print("Doc names: "+" ".join(self.doc_dict[idx] for idx in docIDs[:5]) + ' ...')
@@ -212,7 +247,6 @@ class SearchEngine:
                 file_object = open(os.path.join(entry, self.doc_dict[docID]))
                 file=file_object.read()
                 # pos = self.inverted_index[key][1][docID][-1]
-                print(self.doc_dict[docID])
                 dispStr1,dispStr2,dispStr3 = self.display_string(file, key)
                 print("\033[32;1m {}".format(self.doc_dict[docID])+": \033[0m",end='')
                 print(dispStr1,end='')

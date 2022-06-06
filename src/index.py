@@ -20,7 +20,8 @@ class Parser:
         pass
     def parse(stream: str):
         stream = stream.replace('&', ' ')\
-                       .replace(';', ' ')
+                       .replace(';', ' ')\
+                       .replace('/', ' ') 
         list1=stream.split(' ')
         list2=[]
         for o in list1:
@@ -32,7 +33,9 @@ class Parser:
         resultlist=[]
         ps = Stemmer()
         for o in wordList:
-            resultlist.append(ps.stem(o))
+            oo = ps.stem(o)
+            if len(oo) > 0:
+                resultlist.append(oo)
         return resultlist
 
 class Index:

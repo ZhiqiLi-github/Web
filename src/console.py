@@ -2,6 +2,7 @@ from  engine import SearchEngine
 
 def main():
     engine = SearchEngine()
+    engine.info()
     while True:
         result = engine.interpreter(input(">>> "))
         engine.display(result)

@@ -124,7 +124,7 @@ def phrase_search(command, index):
 
     doc_ret = list(invert1.keys())
     doc_ret.sort()
-    return doc_ret, " ".join(ori), False
+    return doc_ret, " ".join(ori), True
 
 if __name__ == "__main__":
     # a = list(range(0,100,2))
