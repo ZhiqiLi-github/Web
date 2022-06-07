@@ -16,6 +16,7 @@ class VSM:
             self.vector = np.load('../data/index/vector.npy')
             self.vector_std = np.load('../data/index/vector_std.npy')
             self.idf = np.load('../data/index/idf.npy')
+            self.vec_length = np.load('../data/index/vec_length.npy')
         else:
             n_words = len(list(II.keys()))
             idf = []
@@ -31,19 +32,19 @@ class VSM:
                 vector[index][keys] = list(map(len, values))
                 # for key, value in v[1].items():
                 #     vector[index][key] = len(value)
-                
+            self.vec_length = np.sum(vector, axis=0)
             idf = np.array(idf)
             vector[vector == 0] = 0.1
             vector = np.log10(vector) + 1
             # idf = np.array(idf)S
             self.idf = np.log10(M/idf)
-            idf = np.expand_dims(idf, axis=1)
-            self.vector = vector * idf
+            # idf = np.expand_dims(idf, axis=1)
+            self.vector = vector * np.expand_dims(self.idf, axis=1)
             self.vector_std = self.vector / (np.sqrt(np.sum(self.vector**2, axis=0))+1e-8) 
             np.save('../data/index/idf.npy', self.idf)
             np.save('../data/index/vector.npy', self.vector)
             np.save('../data/index/vector_std.npy', self.vector_std)
-
+            np.save('../data/index/vec_length.npy',self.vec_length)
     def Top_k_query(self, command, k):
         '''
             input: vector: vector of doc N*M
@@ -51,9 +52,15 @@ class VSM:
                    k: the top k you need
             output idx: the list of result  
         '''
-        q_vector = self.str_to_vec(command) * self.idf
-        q_vector = np.expand_dims(q_vector,axis=1)
-        cosine = np.sum(self.vector_std * q_vector, axis=0) / np.linalg.norm(q_vector)
+        q_vector = np.zeros(self.vector_std.shape[1])
+        keys = list(self.inverted_index.keys())
+        for s in command:
+            q_vector += self.vector_std[keys.index(s), :]
+
+        # q_vector = self.str_to_vec(command)
+        # q_vector = np.expand_dims(q_vector,axis=1)
+        cosine = q_vector
+        # cosine = cosine / self.vec_length
         ret = np.argpartition(-cosine, k)[:k]
         ret_cosine = cosine[ret]
         ret_idx = np.argsort(-ret_cosine)
