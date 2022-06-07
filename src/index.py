@@ -231,7 +231,6 @@ class Index:
 
     def __read(self, path="../data/index",fileName='II'):
         ## here need to read the fileand convert it to bytes
-        print('reading index file ... ')
         byteList = np.load(os.path.join(path,fileName+'.npy'))
         II = list(byteList)
 
@@ -277,7 +276,6 @@ class Index:
                 posWordList[1][docID] = posOneDoc
             newII[keyList[i]]=posWordList
 
-        print('Done!')
         return newII 
 
     # def WriteII(II,path="../data",fileName='II',mode='bits'): #mode:bits and json

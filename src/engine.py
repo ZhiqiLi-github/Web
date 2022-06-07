@@ -248,7 +248,7 @@ class SearchEngine:
             else:
                 docIDs_to_show = docIDs[:5]
             for docID in docIDs_to_show:
-                file_object = open(os.path.join(entry, self.doc_dict[docID]))
+                file_object = open(os.path.join(entry, self.doc_dict[docID]), encoding='ISO-8859-1')
                 file=file_object.read()
                 # pos = self.inverted_index[key][1][docID][-1]
                 dispStr1,dispStr2,dispStr3 = self.display_string(file, key)
@@ -258,6 +258,9 @@ class SearchEngine:
                 print(dispStr3)
                 ## first detect if the index exists
     def display_string(self, oneStr, key):
+        oneStr = oneStr.replace('&', ' ')\
+               .replace(';', ' ')\
+               .replace('/', ' ') 
         list1 = oneStr.split(' ')
         m = {}
         list2 = []
@@ -289,6 +292,10 @@ class SearchEngine:
                 r += list1[i] + ' '
                 length += len(list1[i])+1
             begin = oneStr.find(r)
+            length -= 1
+            if not oneStr[begin].isalpha():
+                begin += 1
+            length = len(oneStr[begin:begin+length].strip('\n \t,.<>/\\;\'\"()@!#$%^&*?`+-'))
             minIndex = 0
             for i in range(20, 100):
                 if begin - i <= 0:
