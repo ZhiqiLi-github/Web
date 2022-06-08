@@ -237,11 +237,11 @@ class SearchEngine:
         else:
             choice = 'n'
                 
-        # if choice == 'n':
-        #     print("Doc names: "+" ".join(self.doc_dict[idx] for idx in docIDs[:5]) + ' ...')
+        if choice == 'n':
+            print("Doc names: "+" ".join(self.doc_dict[idx] for idx in docIDs[:5]) + ' ...')
 
-        # else:
-        print("Doc names: "+" ".join(self.doc_dict[idx]+'\n' if (cnt+1) % 5 == 0 else self.doc_dict[idx] for cnt, idx in enumerate(docIDs)) )
+        else:
+            print("Doc names: "+" ".join(self.doc_dict[idx]+'\n' if (cnt+1) % 5 == 0 else self.doc_dict[idx] for cnt, idx in enumerate(docIDs)) )
         if disp:
             if choice == 'y':
                 docIDs_to_show = docIDs
