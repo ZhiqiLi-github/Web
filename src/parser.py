@@ -1,4 +1,5 @@
 from nltk.corpus import wordnet as wn
+from stem import Stemmer
 import copy
 
 OPRAND = {
@@ -7,6 +8,7 @@ OPRAND = {
     "OR": 0,
 }
 
+stemmer = Stemmer()
 def infix2postfix(sequence):
     ret = []
     op_stack = []
@@ -59,7 +61,7 @@ def synonym(word: str):
     synsets = wn.synsets(word)
     ret = [word]
     for syn in synsets:
-        ret.append(syn.lemmas()[0].name())
+        ret.append(stemmer.stem(syn.lemmas()[0].name()))
     ret = list(set(ret))[:3]
 
     return ret

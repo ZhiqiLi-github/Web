@@ -293,7 +293,7 @@ class SearchEngine:
                 length += len(list1[i])+1
             begin = oneStr.find(r)
             length -= 1
-            if not oneStr[begin].isalpha():
+            if not oneStr[begin].isalnum():
                 begin += 1
             length = len(oneStr[begin:begin+length].strip('\n \t,.<>/\\;\'\"()@!#$%^&*?`+-'))
             minIndex = 0
