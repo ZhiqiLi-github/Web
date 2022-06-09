@@ -5,7 +5,7 @@ from index2 import load_index
 from time import *
 from math import floor
 from random import randint
-
+from index import Index
 
 class Node:
     """
@@ -362,42 +362,38 @@ class BPlusTree(object):
 
 # The main function
 def main():
-	dest_dir = '../data/index_file/'
-	pathofdictionary = '../data/index_file/dictionary.npy'
-	inverted_index = load_index(pathofdictionary,dest_dir+'index.npy')
-	print(len(inverted_index.keys()))
-
-	B = BPlusTree(order=4)
+    index = Index()
+    inverted_index = index.inverted_index
+    doc_dict, num_docs = index.get_doc()
+    B = BPlusTree(order=4)
     # Insert
-	customNo = len(inverted_index.keys())
-	for i in range(customNo):
-		key = list(inverted_index.keys())[i]
+    customNo = len(inverted_index.keys())
+    for i in range(customNo):
+        key = list(inverted_index.keys())[i]
 		# B.insert((key,inverted_index[key]))
-		B.insert(key,0)
-	B.printTree()
-	print()
+        B.insert(key,0)
+    B.printTree()
+    # print()
 
-	begin_time = time()
-	for i in range(10000):
-		idx = randint(0,customNo-1)
-		key = list(inverted_index.keys())[idx]
+    begin_time = time()
+    for i in range(100000):
+        idx = randint(0,customNo-1)
+        key = list(inverted_index.keys())[idx]
 		# print(inverted_index[key])
-		index = inverted_index[key]
-
-	end_time = time()
-	run_time = end_time - begin_time
-	print('python字典搜索运行时间：', run_time)
+        index = inverted_index[key]
+    end_time = time()
+    run_time1 = end_time - begin_time
+    print(f'python字典搜索运行时间:{run_time1}s')
 	
-	begin_time = time()
-	for i in range(10000):
-		idx = randint(0,customNo-1)
-		key = list(inverted_index.keys())[idx]
-		index = B.retrieve(key)
-
-	end_time = time()
-	run_time = end_time - begin_time
-	print('B+树搜索运行时间：', run_time)
-	
+    begin_time = time()
+    for i in range(100000):
+        idx = randint(0,customNo-1)
+        key = list(inverted_index.keys())[idx]
+        index = B.retrieve(key)
+    end_time = time()
+    run_time2 = end_time - begin_time
+    print(f'B+树搜索运行时间:{run_time2}s')
+    print(f'两者比率{run_time2/run_time1}')
 
 # Program starts here
 if __name__ == '__main__':
