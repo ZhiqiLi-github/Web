@@ -17,6 +17,7 @@ class SearchEngine:
             "wildcard": 1,
             "phrase": 2,
             "topk": 3,
+            "fast_topk":4
         }
         self.command = {
             "switch": self.switch,
@@ -49,7 +50,8 @@ class SearchEngine:
             lambda command: bool_search(command, self.inverted_index),
             lambda command: wildcard_search(command, self.two_gram_index, self.inverted_index),
             lambda command: phrase_search(command, self.inverted_index),
-            lambda command: self.vsm.Top_k_query(command, self.top_k)
+            lambda command: self.vsm.Top_k_query(command, self.top_k),
+            lambda command: self.vsm.Fast_topk_query(command, self.top_k)
         ]
 
         self.stemmer = Stemmer()
@@ -65,6 +67,7 @@ class SearchEngine:
         print("Extend         : \033[33;1m{}\033[0m".format(self.extend))
         print("Correct        : \033[33;1m{}\033[0m".format(self.correct))
         print("Top K          : \033[33;1m{}\033[0m".format(self.top_k))
+        print("Fast Top K     : \033[33;1m{}\033[0m".format(self.top_k))
         print("Support Command: ")
         for i in self.command.keys():
             print("       \033[33;1m{}\033[0m".format(i) + "  info: {}".format(self.command_info[i]))
@@ -215,7 +218,7 @@ class SearchEngine:
         return        
     def display(self, result):
         if result is not None:
-            if self.state != 3:
+            if self.state not in [3,4]:
                 for docIDs, key, disp in result:
                     self.display_res(docIDs, key, disp)
             else:
@@ -237,11 +240,11 @@ class SearchEngine:
         else:
             choice = 'n'
                 
-        if choice == 'n':
-            print("Doc names: "+" ".join(self.doc_dict[idx] for idx in docIDs[:5]) + ' ...')
+        # if choice == 'n':
+        #     print("Doc names: "+" ".join(self.doc_dict[idx] for idx in docIDs[:5]) + ' ...')
 
-        else:
-            print("Doc names: "+" ".join(self.doc_dict[idx]+'\n' if (cnt+1) % 5 == 0 else self.doc_dict[idx] for cnt, idx in enumerate(docIDs)) )
+        # else:
+        print("Doc names: "+" ".join(self.doc_dict[idx]+'\n' if (cnt+1) % 5 == 0 else self.doc_dict[idx] for cnt, idx in enumerate(docIDs)) )
         if disp:
             if choice == 'y':
                 docIDs_to_show = docIDs
@@ -293,7 +296,7 @@ class SearchEngine:
                 length += len(list1[i])+1
             begin = oneStr.find(r)
             length -= 1
-            if not oneStr[begin].isalnum():
+            if not oneStr[begin].isalpha():
                 begin += 1
             length = len(oneStr[begin:begin+length].strip('\n \t,.<>/\\;\'\"()@!#$%^&*?`+-'))
             minIndex = 0
