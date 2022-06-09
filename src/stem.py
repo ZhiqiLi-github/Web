@@ -217,8 +217,8 @@ class Stemmer():
                 ("ible", "", measure_gt_1),
                 ("ant", "", measure_gt_1),
                 ("ement", "", measure_gt_1),
-                ("ment", "", measure_gt_1),
-                ("ent", "", measure_gt_1),
+                # ("ment", "", measure_gt_1),
+                # ("ent", "", measure_gt_1),
                 # (m>1 and (*S or *T)) ION ->
                 # (
                 #     "ion",
