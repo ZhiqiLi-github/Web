@@ -24,7 +24,7 @@ python console.py
 
 运行`console.py`后一段时间，程序读取创建/读取index完毕，进入开始界面。
 
-![6](image\6.png)
+![6](./image/6.png)
 
 此处展示了目前的search  mode，支持的指令等信息。如果想要重新展示导航栏，请输入
 
@@ -46,7 +46,7 @@ python console.py
 
 打开特定功能，如`open extend`为开启同义词扩展功能
 
-![7](image\7.png)
+![7](./image/7.png)
 
 #### `:close`
 
@@ -105,7 +105,7 @@ NOT rise AND fall
 commodity company
 ```
 
-![11](image\11.png)
+![11](./image/11.png)
 
 返回含有该短语的文档，高亮单词所在位置
 
