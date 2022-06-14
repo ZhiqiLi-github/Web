@@ -7,16 +7,60 @@
 使用web search engine的命令如下
 
 ```bash
-git clone ...
-cd $WEBHOME/src 
+git clone https://github.com/X1yu-Zhang/Web.git
+cd Web
+mkdir data
+```
+我们需要将Reuters 文件夹放在data下，文件结构如下所示
+
+```
+.
+├── data
+│   └── Reuters
+├── env.yaml
+├── image
+├── MANUAL.md
+├── Manual.pdf
+├── README.md
+└── src
+    ├── btree.py
+    ├── console.py
+    ├── correct.py
+    ├── engine.py
+    ├── gamma.py
+    ├── index2.py
+    ├── index.py
+    ├── parser.py
+    ├── __pycache__
+    ├── search.py
+    ├── stem.py
+    └── vsm.py
+
+```
+创建python 运行的虚拟环境，并运行生成倒排索引。
+
+```
+conda create -f env.yaml
+conda activate web
+cd src 
 python console.py
 ```
 
 - 该应用目前支持Linux和macOS下运行
 - 请事先安装使用的库（如numpy）以及模型（如wordnet）
-- 在运行`console.py`之前，请确认`index`目录下有如下文件：
+- 在运行`console.py`之前，请确认`data`目录为如下结构：
 
-![](./image/2.png)
+```
+data
+├── index
+│   ├── doc_dict.npz
+│   ├── idf.npy
+│   ├── II.npy
+│   ├── two_gram.txt
+│   ├── vector.npy
+│   └── vector_std.npy
+└── Reuters
+```
 
 如果文件不全，请将index目录删除，重新运行`console.py`，应用将生成上述文件。
 
