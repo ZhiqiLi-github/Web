@@ -40,8 +40,9 @@ mkdir data
 创建python 运行的虚拟环境，并运行生成倒排索引。
 
 ```
-conda create -f env.yaml
+conda env create -f env.yaml
 conda activate web
+python -m nltk.downloader wordnet
 cd src 
 python console.py
 ```
