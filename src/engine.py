@@ -1,6 +1,5 @@
 from itertools import product
 import os
-from pydoc import doc
 
 from vsm import VSM
 from search import bool_search, wildcard_search, phrase_search

@@ -8,9 +8,7 @@ parser:
     
 """
 import os
-from tkinter.tix import Tree
 import numpy as np
-import pandas as pd
 from stem import Stemmer
 from tqdm import trange, tqdm
 from multiprocessing.dummy import Pool

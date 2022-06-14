@@ -1,6 +1,5 @@
 from nltk.corpus import wordnet as wn
 from stem import Stemmer
-import copy
 
 OPRAND = {
     "NOT": 2, 

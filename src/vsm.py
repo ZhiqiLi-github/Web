@@ -1,5 +1,3 @@
-# from pkg_resources import VersionConflict
-from cmath import cos
 from index import *
 import numpy as np
 from index import Index
