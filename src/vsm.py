@@ -70,11 +70,11 @@ class VSM:
         return ret, " ".join(command), ret_cosine
 
     def Fast_topk_query(self,command,k):
-        q_vector = self.str_to_vec(command) * self.idf
-        q_vector = np.expand_dims(q_vector,axis=1)
-        idx = []
-        keys = list(self.inverted_index.keys())
         if len(command) > 1:
+            q_vector = self.str_to_vec(command) * self.idf
+            q_vector = np.expand_dims(q_vector,axis=1)
+            idx = []
+            keys = list(self.inverted_index.keys())
             indexs = [keys.index(s) for s in command]
             idfs = [self.idf[index] for index in indexs]
             index = indexs[np.argmax(idfs)]
@@ -84,9 +84,13 @@ class VSM:
             print(len(vector_std))
             if len(vector_std) < k:
                 vector_std = self.vector_std
+            cosine = np.sum(vector_std * q_vector, axis=0) / np.linalg.norm(q_vector)
         else:
-            vector_std = self.vector_std
-        cosine = np.sum(vector_std * q_vector, axis=0) / np.linalg.norm(q_vector)
+            q_vector = np.zeros(self.vector_std.shape[1])
+            keys = list(self.inverted_index.keys())
+            for s in command:
+                q_vector += self.vector_std[keys.index(s), :]
+            cosine = q_vector
         ret = np.argpartition(-cosine, k)[:k]
         ret_cosine = cosine[ret]
         ret_idx = np.argsort(-ret_cosine)

@@ -125,7 +125,7 @@ class SearchEngine:
     
     def search(self, command):
         command_list = self.preprocess(command)
-        if self.extend:
+        if self.extend and self.state not in [1,3]:
             print("Extended command: \n")
             for command in command_list:
                 print("\033[33;1m{}\033[0m".format(" ".join(command)))
@@ -148,11 +148,13 @@ class SearchEngine:
                 command_list[i] = self.stem(command_list[i])
                 if self.correct:
                     command_list[i] = wrong_word(self.inverted_index, command_list[i])
+                    word_list[i] = command_list[i]
                 else:
                     if command_list[i] not in self.inverted_index:
                         raise Exception("No such word ...")
 
-            if self.extend and self.state != 3:
+
+            if self.extend and self.state not in [1, 3]:
                 all_words = list(synonym(word_list[i]) for i in word_idx)
                 tmp = list(product(*all_words))
                 tmp = list(zip(*tmp))
@@ -240,11 +242,11 @@ class SearchEngine:
         else:
             choice = 'n'
                 
-        # if choice == 'n':
-        #     print("Doc names: "+" ".join(self.doc_dict[idx] for idx in docIDs[:5]) + ' ...')
+        if choice == 'n':
+            print("Doc names: "+" ".join(self.doc_dict[idx] for idx in docIDs[:5]) + ' ...')
 
-        # else:
-        print("Doc names: "+" ".join(self.doc_dict[idx]+'\n' if (cnt+1) % 5 == 0 else self.doc_dict[idx] for cnt, idx in enumerate(docIDs)) )
+        else:
+            print("Doc names: "+" ".join(self.doc_dict[idx]+'\n' if (cnt+1) % 5 == 0 else self.doc_dict[idx] for cnt, idx in enumerate(docIDs)) )
         if disp:
             if choice == 'y':
                 docIDs_to_show = docIDs
